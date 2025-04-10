@@ -70,24 +70,26 @@ int main(int argc, char *argv[], char *envp[]) {
         return do_work();
     }
 
-    printf("[%d] Enjoying some brandy.....\n", getpid());
-    printf("[%d] Where the fudge is coal\n", getpid());
+    pid_t forked = fork();
+    if (forked == 0) {
+        return do_work();
+    }
 
-    for (int i = 0, i < 10; i++){
+    for (int i = 0; i < 10; i++) {
         int wstatus = 0;
-        pid_t const waited = wait(&wstatus);
-        if (WIFEXITED(wstatus)) 
-        {
-       printf("[%d] child %d exited normally with return code %d\n", getpid(), waited, WEXITSTATUS(wstatus))
-                waited, WEXITSTATUS(wstatus);
+        pid_t waited = wait(&wstatus);
+        
+        if (WIFEXITED(wstatus)) {
+            printf("[%d] child %d exited normally with return code %d\n",
+                   getpid(), waited, WEXITSTATUS(wstatus));
         } 
-        else if(WIFSIGNALED(wstatus)) 
-        {
-            printf("[%d] child %d terminated with signal %d\n", getpid(), waited, WTERMSIG(wstatus))
-        }
-        else 
-        {
-            printf("[%d] child %d, status is %d\n", getpid(), waited, WTERMSIG(wstatus));
+        else if (WIFSIGNALED(wstatus)) {
+            printf("[%d] child %d terminated with signal %d\n",
+                   getpid(), waited, WTERMSIG(wstatus));
+        } 
+        else {
+            printf("[%d] child %d ended unexpectedly, status = %d\n",
+                   getpid(), waited, wstatus);
         }
 
         printf("[%d] wait returned %d, status is %d\n", getpid(), waited, wstatus);
